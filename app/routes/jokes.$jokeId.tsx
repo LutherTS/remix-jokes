@@ -2,10 +2,10 @@ import type { LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 
-import { db } from "~/utils/db.server";
+import { prisma } from "~/utils/db.server";
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
-  const joke = await db.joke.findUnique({
+  const joke = await prisma.joke.findUnique({
     where: { id: params.jokeId },
   });
   if (!joke) {

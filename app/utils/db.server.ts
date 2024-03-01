@@ -8,5 +8,6 @@ export const db = singleton("prisma", () => new PrismaClient());
 //
 
 import { remember } from "@epic-web/remember";
+// https://www.npmjs.com/package/@epic-web/remember
 
 export const prisma = remember("prisma", () => new PrismaClient());

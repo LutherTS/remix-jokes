@@ -3,7 +3,8 @@ import { Link, Outlet, useLoaderData } from "@remix-run/react";
 import { json } from "@remix-run/node";
 
 import stylesUrl from "~/styles/jokes.css";
-import { db } from "~/utils/db.server";
+import { db, prisma } from "~/utils/db.server";
+// prisma via remember works just fine
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesUrl },
@@ -11,11 +12,12 @@ export const links: LinksFunction = () => [
 
 export const loader = async () => {
   return json({
-    jokesListItems: await db.joke.findMany({
+    jokesListItems: await prisma.joke.findMany({
       // honestly a lot more straightforward in Postgres
       // orderBy: {
       //   name: "asc",
       // },
+      // (previous code above)
       orderBy: { createdAt: "desc" },
       select: { id: true, name: true },
       take: 5,
@@ -42,7 +44,7 @@ export default function JokesRoute() {
         <div className="container">
           <div className="jokes-list">
             <Link to=".">Get a random joke</Link>
-            <p>Here are a few more jokes to check out:</p>
+            <p>Here are some of the most recent jokes to check out:</p>
             {/* <ul>
               <li>
                 <Link to="some-joke-id">Hippo</Link>

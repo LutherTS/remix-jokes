@@ -2,7 +2,7 @@ import type { ActionFunctionArgs } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
 import { useActionData } from "@remix-run/react";
 
-import { db } from "~/utils/db.server";
+import { prisma } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 
 function validateJokeContent(content: string) {
@@ -47,7 +47,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     });
   }
 
-  const joke = await db.joke.create({
+  const joke = await prisma.joke.create({
     // data: { name, content },
     data: fields,
   });
