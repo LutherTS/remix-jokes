@@ -4,7 +4,7 @@ import { Link, useActionData, useSearchParams } from "@remix-run/react";
 import stylesUrl from "~/styles/login.css";
 import { prisma } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
-import { login } from "~/utils/session.server";
+import { createUserSession, login } from "~/utils/session.server";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesUrl },
@@ -79,11 +79,14 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         });
       }
       // if there is a user, create their session and redirect to /jokes
+      return createUserSession(user.id, redirectTo);
+      /* Now implemented
       return badRequest({
         fieldErrors: null,
         fields,
         formError: "Not implemented",
       });
+      */
     }
     case "register": {
       const userExists = await prisma.user.findFirst({
