@@ -4,7 +4,7 @@ import { Link, useActionData, useSearchParams } from "@remix-run/react";
 import stylesUrl from "~/styles/login.css";
 import { prisma } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
-import { createUserSession, login } from "~/utils/session.server";
+import { createUserSession, login, register } from "~/utils/session.server";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesUrl },
@@ -89,8 +89,12 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       */
     }
     case "register": {
+      // Can't believe it ends up being that easy at least with Remix.
       const userExists = await prisma.user.findFirst({
+        // why findFirst and not findUnique
         where: { username },
+        // since the names are the same it's the of saying:
+        // where username (the field) = username (the parameter)
       });
       if (userExists) {
         return badRequest({
@@ -100,12 +104,24 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         });
       }
       // create the user
+      const user = await register({ username, password });
+      if (!user) {
+        return badRequest({
+          fieldErrors: null,
+          fields,
+          formError: "Something went wrong trying to create a new user.",
+        });
+      }
       // create their session and redirect to /jokes
+      return createUserSession(user.id, redirectTo);
+      // redirectTo at this redirects to /jokes "by default"
+      /* Now implemented
       return badRequest({
         fieldErrors: null,
         fields,
         formError: "Not implemented",
       });
+      */
     }
     default: {
       return badRequest({

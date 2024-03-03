@@ -131,4 +131,6 @@ I mean if you make a little website do you even need SQL if users won't be able 
 P.S.: YES.
 ...
 What would be nice at this point or eventually would be to hide the "Add your own" button if you're not connected (I can't believe I now know how to login and even talk casually about the next steps), and also redirect to login on the route /jokes/new if the user is not logged in, with the added bonus that the query params should indicate and be used to tell that the user got redirected there from /jokes/new because they weren't connected.
+...
+We also haven't fixed the bug yet that a logged-in user should not have access to the login route while connected. So for now I wouldn't try to see what would happen if I try to make use of that route in this circumstance. (Though one could argue it is also a case I should be verify if for some reason the bug fix is not working.)
 */
