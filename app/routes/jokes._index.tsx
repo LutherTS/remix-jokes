@@ -1,7 +1,27 @@
 import { json } from "@remix-run/node";
-import { Link, useLoaderData } from "@remix-run/react";
+import {
+  isRouteErrorResponse,
+  Link,
+  useLoaderData,
+  useRouteError,
+} from "@remix-run/react";
 
 import { prisma } from "~/utils/db.server";
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+
+  if (isRouteErrorResponse(error) && error.status === 404) {
+    return (
+      <div className="error-container">
+        <p>There are no jokes to display.</p>
+        {/* <Link to="new">Add your own</Link> */}
+      </div>
+    );
+  }
+
+  return <div className="error-container">I did a whoopsies.</div>;
+}
 
 export const loader = async () => {
   const count = await prisma.joke.count();
@@ -10,6 +30,13 @@ export const loader = async () => {
     skip: randomRowNumber,
     take: 1,
   });
+
+  if (!randomJoke) {
+    throw new Response("No random joke found", {
+      status: 404,
+    });
+  }
+
   return json({ randomJoke });
 };
 

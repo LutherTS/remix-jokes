@@ -1,13 +1,37 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { useActionData } from "@remix-run/react";
+import {
+  isRouteErrorResponse,
+  useActionData,
+  Link,
+  useRouteError,
+} from "@remix-run/react";
 
 import { prisma } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 // Got it. That's what allows the currently logged in user
 // to be the jokester of the joke being create in this
 // jokes/new route.
-import { getUser, requireUserId } from "~/utils/session.server";
+import { getUser, getUserId, requireUserId } from "~/utils/session.server";
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+
+  if (isRouteErrorResponse(error) && error.status === 401) {
+    return (
+      <div className="error-container">
+        <p>You must be logged in to create a joke.</p>
+        {/* <Link to="/login">Login</Link> */}
+      </div>
+    );
+  }
+
+  return (
+    <div className="error-container">
+      Something unexpected went wrong. Sorry about that.
+    </div>
+  );
+}
 
 function validateJokeContent(content: string) {
   if (content.length < 10) {
@@ -28,8 +52,23 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     throw redirect("/login");
   }
   return json({ user });
-  // next I'll need to customize the redirectedTo
+  // next I'll need to customize the redirectedTo, rather FROM
+  // genre /login?redirected-from=jokes-new
+  // et sur /login j'ai un composant qui s'affiche uniquement sur il y a
+  // redirected-from=jokes-new dans les searchParams.
 };
+
+// I honestly genuinely believe for now my code to be the better experience.
+// I categorically believe that users should only be aware in the code of
+// the existence of things that they able to modify.
+
+// export const loader = async ({ request }: LoaderFunctionArgs) => {
+//   const userId = await getUserId(request);
+//   if (!userId) {
+//     throw new Response("Unauthorized", { status: 401 });
+//   }
+//   return json({});
+// };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const userId = await requireUserId(request);
