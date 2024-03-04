@@ -77,9 +77,19 @@ export default function JokesRoute() {
                 </li>
               ))}
             </ul>
-            <Link to="new" className="button">
+            {/* <Link to="new" className="button">
               Add your own
-            </Link>
+            </Link> */}
+            {/* MY CODE */}
+            {data.user ? (
+              <Link to="new" className="button">
+                Add your own
+              </Link>
+            ) : (
+              <Link to="/login" className="button">
+                Add your own
+              </Link>
+            )}
           </div>
           <div className="jokes-outlet">
             <Outlet />

@@ -1,10 +1,25 @@
-import type { LinksFunction, ActionFunctionArgs } from "@remix-run/node";
-import { Link, useActionData, useSearchParams } from "@remix-run/react";
+import type {
+  LinksFunction,
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+} from "@remix-run/node";
+import {
+  Link,
+  json,
+  redirect,
+  useActionData,
+  useSearchParams,
+} from "@remix-run/react";
 
 import stylesUrl from "~/styles/login.css";
 import { prisma } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
-import { createUserSession, login, register } from "~/utils/session.server";
+import {
+  createUserSession,
+  getUser,
+  login,
+  register,
+} from "~/utils/session.server";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesUrl },
@@ -29,6 +44,16 @@ function validateUrl(url: string) {
   }
   return "/jokes";
 }
+
+/* MY CODE */
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  const user = await getUser(request);
+  if (user) {
+    throw redirect("/jokes");
+  }
+  return json({ user });
+  // loader needs to return something
+};
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const form = await request.formData();
