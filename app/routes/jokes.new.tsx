@@ -3,10 +3,13 @@ import { json, redirect } from "@remix-run/node";
 import {
   isRouteErrorResponse,
   useActionData,
+  useNavigation,
   Link,
   useRouteError,
+  Form,
 } from "@remix-run/react";
 
+import { JokeDisplay } from "~/components/joke";
 import { prisma } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 // Got it. That's what allows the currently logged in user
@@ -16,6 +19,7 @@ import { getUser, getUserId, requireUserId } from "~/utils/session.server";
 
 export function ErrorBoundary() {
   const error = useRouteError();
+  console.error(error);
 
   if (isRouteErrorResponse(error) && error.status === 401) {
     return (
@@ -111,11 +115,34 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
 export default function NewJokeRoute() {
   const actionData = useActionData<typeof action>();
+  const navigation = useNavigation();
+
+  // En fait, c'est dans cet optique de Optimistic UI qu'il fait ses
+  // validations à la main. Mais je suis sûr qu'il y a aussi moyen de
+  // moyenner avec Zod.
+  if (navigation.formData) {
+    const content = navigation.formData.get("content");
+    const name = navigation.formData.get("name");
+    if (
+      typeof content === "string" &&
+      typeof name === "string" &&
+      !validateJokeContent(content) &&
+      !validateJokeName(name)
+    ) {
+      return (
+        <JokeDisplay
+          canDelete={false}
+          isOwner={true}
+          joke={{ name, content }}
+        />
+      );
+    }
+  }
 
   return (
     <div>
       <p>Add your own hilarious joke</p>
-      <form method="post">
+      <Form method="post">
         <div>
           <label>
             Name:{" "}
@@ -167,7 +194,7 @@ export default function NewJokeRoute() {
             Add
           </button>
         </div>
-      </form>
+      </Form>
     </div>
   );
 }
